@@ -17,3 +17,43 @@ class User(db.Model):
             "email": self.email,
             # do not serialize the password, its a security breach
         }
+
+class Planets(db.Model):
+    __tablename__ = 'planets'
+    # Here we define columns for the table person
+    # Notice that each column is also a normal Python instance attribute.
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(250), nullable=False)
+    population = db.Column(db.Integer)
+    climate = db.Column(db.String(250))
+
+    def __repr__(self):
+        return '<Planets %r>' % self.id
+
+    def serialize(self):
+        return {
+            
+            "name": self.name,
+            "population": self.population,
+            "climate": self.climate
+            # do not serialize the password, its a security breach
+        }
+
+class Characters(db.Model):
+    __tablename__ = 'characters'
+    # Here we define columns for the table person
+    # Notice that each column is also a normal Python instance attribute.
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(250) )
+    home = db.Column(db.String(250) )
+    ships = db.Column(db.String(250))
+
+    def __repr__(self):
+        return '<Characters %r>' % self.id
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            # do not serialize the password, its a security breach
+        }
