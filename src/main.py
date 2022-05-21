@@ -11,6 +11,7 @@ from admin import setup_admin
 from models import db, User
 from models import Characters
 from models import Planets
+from models import Favorites
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -21,7 +22,7 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 
-todos = [ { "label": "My first task", "done": False } ]
+
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -34,13 +35,23 @@ def sitemap():
 
 @app.route('/people', methods=['GET'])
 def handle_people():
-    json_text = jsonify(todos)
-    return json_text, 200
+    people = Characters.query.all()
+
+    response = []
+    for p in people:
+        response.append(p.serialize())
+    
+    return jsonify(response)
 
 @app.route('/people/<int:people_id>', methods=['GET'])
 def handle_people_id():
-    json_text = jsonify(todos)
-    return json_text, 200
+    people = Characters.query.all()
+
+    response = []
+    for p in people:
+        response.append(p.serialize())
+    
+    return jsonify(response)
 
 @app.route('/planets', methods=['GET'])
 def handle_planets():
@@ -51,7 +62,7 @@ def handle_planets():
 @app.route('/people', methods=['POST'])
 def handle_people_post():
     payload_people = request.get_json()
-    info_people = Characters(name=payload_people["name"], home=payload_people["home"], ships=payload_people["ships"])
+    info_people = Characters(name=payload_people["name"], hair=payload_people["hair"], ships=payload_people["ships"])
     return jsonify(info_people), 200
 
 @app.route('/planets', methods=['POST'])
@@ -62,6 +73,8 @@ def handle_planets_post():
     db.session.commit()
     return "success", 200
 
+
+
 # @app.route('/planets/<int:planet_id>', methods=['GET'])
 # def handle_planet_id():
 #     json_text = jsonify(todos)
@@ -69,13 +82,23 @@ def handle_planets_post():
 
 @app.route('/users', methods=['GET'])
 def handle_users():
-    json_text = jsonify(todos)
-    return json_text, 200
+    user = User.query.all()
+
+    response = []
+    for x in user:
+        response.append(x.serialize())
+    
+    return jsonify(response)
 
 @app.route('/users/favorites', methods=['GET'])
 def handle_users_favorites():
-    json_text = jsonify(todos)
-    return json_text, 200
+    fav = Favorites.query.all()
+
+    response = []
+    for x in fav:
+        response.append(x.serialize())
+    
+    return jsonify(response)
 
 
 @app.route('/favorite/planet/<int:planet_id>', methods=['POST'])

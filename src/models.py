@@ -7,6 +7,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -27,8 +28,10 @@ class Planets(db.Model):
     population = db.Column(db.Integer)
     climate = db.Column(db.String(250))
 
+
+
     def __repr__(self):
-        return '<Planets %r>' % self.id
+        return  self.name
 
     def serialize(self):
         return {
@@ -45,11 +48,39 @@ class Characters(db.Model):
     # Notice that each column is also a normal Python instance attribute.
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250) )
-    home = db.Column(db.String(250) )
+    hair = db.Column(db.String(250) )
     ships = db.Column(db.String(250))
+    homeplanet_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
+    homeplanet = db.relationship('Planets')
 
     def __repr__(self):
-        return '<Characters %r>' % self.id
+        return  self.name
+
+    def serialize(self):
+        return {
+            
+            "name": self.name,
+            "hair": self.hair,
+            "ships": self.ships,
+            "homeplanet_id": self.homeplanet_id
+            # do not serialize the password, its a security breach
+        }
+
+class Favorites(db.Model):
+    __tablename__ = 'favorites'
+    # Here we define columns for the table person
+    # Notice that each column is also a normal Python instance attribute.
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User') 
+    characters_id = db.Column(db.Integer, db.ForeignKey('characters.id'))
+    characters = db.relationship('Characters')
+    planets_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
+    planets = db.relationship('Planets')
+
+
+    def __repr__(self):
+        return '<Favorites %r>' % self.id
 
     def serialize(self):
         return {
