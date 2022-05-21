@@ -12,8 +12,18 @@ from models import db, User
 from models import Characters
 from models import Planets
 from models import Favorites
+from models import Account
+from argon2 import PasswordHasher 
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
+
+ph = PasswordHasher()
+
+
 
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = "very-long-secret-nobody-know"  # Change this "super secret" with something else!
+jwt = JWTManager(app)
+
 app.url_map.strict_slashes = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -21,6 +31,58 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    payload = request.get_json()
+
+    user = User(
+        email=payload['email'], 
+        password=ph.hash(payload['password']), 
+        is_active=True
+    )
+
+    db.session.add(user)
+    db.session.commit()
+
+    return "user registered", 200
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    payload = request.get_json()
+
+    user = User.query.filter(User.email == payload['email']).first()
+    if user is None:
+        return 'failed-auth', 401
+
+    try:
+        ph.verify(user.password, payload['password'])
+    except: 
+        return 'failed-auth', 401
+
+    token = create_access_token(identity=user.id)
+    
+    return jsonify({ 'token': token })
+
+
+@app.route('/accounts', methods=['GET'])
+@jwt_required()
+def accounts():
+    user_id = get_jwt_identity()
+
+    user = User.query.get(user_id)
+    accounts = Account.query.filter(Account.user_id==user_id).all()
+
+    account_info = { 
+        "accounts": [x.serialize() for x in accounts],
+        "user": user.serialize()
+    }
+
+    return jsonify(account_info)
+
 
 
 # Handle/serialize errors like a JSON object
