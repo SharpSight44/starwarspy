@@ -32,14 +32,17 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 
+#1st step /register  #2. /login (token generated/assigned) 
+# 3. /accounts (insert token in Header of GET request ) accesses  Unique USER Data
 
-
+#Perfect /register Choose an Email and Password CREATES New USER & hashes Pwd---------------------------------------------
 @app.route('/register', methods=['POST'])
 def register():
     payload = request.get_json()
 
     user = User(
         email=payload['email'], 
+        phone = payload['phone'],
         password=ph.hash(payload['password']), 
         is_active=True
     )
@@ -49,7 +52,7 @@ def register():
 
     return "user registered", 200
 
-
+#PERFECT /login Requires Correct Registered Email and Password - Produces & Returns a TOKEN-------------------------
 @app.route('/login', methods=['POST'])
 def login():
     payload = request.get_json()
@@ -67,7 +70,7 @@ def login():
     
     return jsonify({ 'token': token })
 
-
+#PERFECT /accounts REQUIRES Token in Header (Token identifies(USER) and displays data unique to them )-----------------
 @app.route('/accounts', methods=['GET'])
 @jwt_required()
 def accounts():
@@ -85,7 +88,7 @@ def accounts():
 
 
 
-# Handle/serialize errors like a JSON object
+# Handle/serialize errors like a JSON object--------------------------------------------------------------
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
@@ -95,6 +98,7 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+#Perfect, /people "GET" Fetches Data from Characters Table -----------------------------------------------
 @app.route('/people', methods=['GET'])
 def handle_people():
     people = Characters.query.all()
@@ -104,7 +108,7 @@ def handle_people():
         response.append(p.serialize())
     
     return jsonify(response)
-
+#//?????????????????????????????????????????????????IDK Yet????????????????????????????????
 @app.route('/people/<int:people_id>', methods=['GET'])
 def handle_people_id():
     people = Characters.query.all()
@@ -115,25 +119,29 @@ def handle_people_id():
     
     return jsonify(response)
 
+#Perfect /planets "GET" Fetches DATA from Planets Table -------------------------------------------------
 @app.route('/planets', methods=['GET'])
 def handle_planets():
     table = Planets.query.all()
     info = list(map(lambda x: x.serialize(),table ) )
     return jsonify(info), 200
 
+#WORKING PERFECT -  /people "POST" Creates a NEW Character and Adds to DATABSE  returns "Success only which is fine for now"
 @app.route('/people', methods=['POST'])
 def handle_people_post():
     payload_people = request.get_json()
     info_people = Characters(name=payload_people["name"], hair=payload_people["hair"], ships=payload_people["ships"])
-    return jsonify(info_people), 200
-
+    db.session.add(info_people)
+    db.session.commit()
+    return "Successfully Added", 200
+#WORKING PERFECT -  /planets "POST" Creates a NEW Planet and Adds to DATABSE  returns "Success only which is fine for now"
 @app.route('/planets', methods=['POST'])
 def handle_planets_post():
     payload = request.get_json()
     info = Planets(name=payload["name"], population=payload["population"], climate=payload["climate"])
     db.session.add(info)
     db.session.commit()
-    return "success", 200
+    return "Successfully Added", 200
 
 
 

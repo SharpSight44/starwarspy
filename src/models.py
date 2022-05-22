@@ -14,13 +14,14 @@ class User(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "email": self.email,
+            "email": self.email
             # do not serialize the password, its a security breach
         }
 
 class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     total = db.Column(db.Integer)
+    # phone = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User')
 
@@ -31,6 +32,7 @@ class Account(db.Model):
         return {
             'id': self.id,
             'total': self.total
+            # 'phone': self.phone
         }
 
 
