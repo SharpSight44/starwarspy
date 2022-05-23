@@ -85,7 +85,22 @@ def accounts():
 
     return jsonify(account_info)
 
+@app.route('/planets/<int:id>', methods=['GET'])
+def handle_planet_id(id):
+    
+    planet = Planets.query.filter(Planets.id)
+    response = {
+        "planet": Planets.serialize(planet[id-1])
+    }
 
+
+    # planet = Planets.query.get(Planets.id==id).all()
+
+    # response = []
+    # for p in planet:
+    #     response.append(p.serialize())
+    
+    return jsonify(response)
 
 # Handle/serialize errors like a JSON object--------------------------------------------------------------
 @app.errorhandler(APIException)
@@ -148,6 +163,7 @@ def handle_planets_post():
 # def handle_planet_id():
 #     json_text = jsonify(todos)
 #     return json_text, 200
+
 
 @app.route('/users', methods=['GET'])
 def handle_users():
