@@ -92,13 +92,6 @@ def handle_planet_id(id):
     response = {
         "planet": Planets.serialize(planet[id-1])
     }
-
-
-    # planet = Planets.query.get(Planets.id==id).all()
-
-    # response = []
-    # for p in planet:
-    #     response.append(p.serialize())
     
     return jsonify(response)
 
@@ -123,13 +116,12 @@ def handle_people():
     
     return jsonify(response)
 #//?????????????????????????????????????????????????IDK Yet????????????????????????????????
-@app.route('/people/<int:people_id>', methods=['GET'])
-def handle_people_id():
-    people = Characters.query.all()
-
-    response = []
-    for p in people:
-        response.append(p.serialize())
+@app.route('/people/<int:id>', methods=['GET'])
+def handle_people_id(id):
+    character = Characters.query.filter(Characters.id)
+    response = {
+        "character": Characters.serialize(character[id-1])
+    }
     
     return jsonify(response)
 
