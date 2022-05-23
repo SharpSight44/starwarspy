@@ -42,7 +42,6 @@ def register():
 
     user = User(
         email=payload['email'], 
-        phone = payload['phone'],
         password=ph.hash(payload['password']), 
         is_active=True
     )
